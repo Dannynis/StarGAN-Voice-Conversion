@@ -50,9 +50,9 @@ class ResidualBlock(nn.Module):
 
     def forward(self, x, c):
         x_ = self.conv_1(x)
-        x_ = self.cin_1(x, c)
-        x_ = self.relu_1(x)
-        x_ = self.out(x)
+        x_ = self.cin_1(x_, c)
+        x_ = self.relu_1(x_)
+        x_ = self.out(x_)
 
         return x + x_
 

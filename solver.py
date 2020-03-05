@@ -232,8 +232,7 @@ class Solver(object):
             # Logging.
             loss = {}
             loss['D/loss_gp'] = d_loss_gp.item()
-            loss['D/loss_real'] = d_loss_real.item()
-            loss['D/loss_fake'] = d_loss_fake.item()
+            loss['D/loss'] = d_loss.item()
             loss['D/loss_cls'] = d_loss_cls_spks.item()
 
             # =================================================================================== #
