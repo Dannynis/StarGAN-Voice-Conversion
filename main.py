@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     # Model configuration.
     parser.add_argument('--num_speakers', type=int, default=4, help='dimension of speaker labels')
-    parser.add_argument('--lambda_cls', type=float, default=1, help='weight for domain classification loss')
+    parser.add_argument('--lambda_cls', type=float, default=5, help='weight for domain classification loss')
     parser.add_argument('--lambda_rec', type=float, default=10, help='weight for reconstruction loss')
     parser.add_argument('--lambda_gp', type=float, default=5, help='weight for gradient penalty')
     parser.add_argument('--lambda_id', type=float, default=5, help='weight for id mapping loss')
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     parser.add_argument('--log_step', type=int, default=10)
     parser.add_argument('--sample_step', type=int, default=10000)
     parser.add_argument('--model_save_step', type=int, default=10000)
-    parser.add_argument('--lr_update_step', type=int, default=100000)
+    parser.add_argument('--lr_update_step', type=int, default=1000)
 
     config = parser.parse_args()
 
