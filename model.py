@@ -43,16 +43,10 @@ class ResidualBlock(nn.Module):
         self.cin_1 = ConditionalInstanceNormalisation(dim_out, style_num)
         self.relu_1 = nn.ReLU(inplace=True)
 
-        self.out = nn.Sequential(
-            nn.Conv1d(dim_out, dim_out, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.InstanceNorm1d(dim_out, affine=True, track_running_stats=True)
-        )
-
     def forward(self, x, c):
         x_ = self.conv_1(x)
         x_ = self.cin_1(x_, c)
         x_ = self.relu_1(x_)
-        x_ = self.out(x_)
 
         return x + x_
 
@@ -96,6 +90,9 @@ class Generator(nn.Module):
         self.residual_4 = ResidualBlock(dim_in=256, dim_out=256, style_num=num_speakers)
         self.residual_5 = ResidualBlock(dim_in=256, dim_out=256, style_num=num_speakers)
         self.residual_6 = ResidualBlock(dim_in=256, dim_out=256, style_num=num_speakers)
+        self.residual_7 = ResidualBlock(dim_in=256, dim_out=256, style_num=num_speakers)
+        self.residual_8 = ResidualBlock(dim_in=256, dim_out=256, style_num=num_speakers)
+        self.residual_9 = ResidualBlock(dim_in=256, dim_out=256, style_num=num_speakers)
 
         # Up-conversion layers.
         self.up_conversion = nn.Conv1d(in_channels=256,
@@ -136,6 +133,9 @@ class Generator(nn.Module):
         x = self.residual_4(x, c)
         x = self.residual_5(x, c)
         x = self.residual_6(x, c)
+        x = self.residual_7(x, c)
+        x = self.residual_8(x, c)
+        x = self.residual_9(x, c)
 
         x = self.up_conversion(x)
         x = x.view(-1, 256, 9, width_size // 4)
