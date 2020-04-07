@@ -57,69 +57,60 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
 
         # Down-sampling layers.
-        self.down_sample_1 = DownSampleBlock(dim_in=1,
-                                             dim_out=32,
-                                             kernel_size=(3, 9),
-                                             stride=(1, 1),
-                                             padding=(1, 4),
-                                             bias=False)
+        self.down_sample_1 = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 9), stride=(1, 1), padding=(1, 4), bias=False),
+            nn.BatchNorm2d(num_features=64, affine=True, track_running_stats=True),
+            nn.GLU(dim=1)
+        )
 
-        self.down_sample_2 = DownSampleBlock(dim_in=32,
-                                             dim_out=64,
-                                             kernel_size=(4, 8),
-                                             stride=(2, 2),
-                                             padding=(1, 3),
-                                             bias=False)
+        self.down_sample_2 = nn.Sequential(
+            nn.Conv2d(in_channels=32, out_channels=128, kernel_size=(4, 8), stride=(2, 2), padding=(1, 3), bias=False),
+            nn.BatchNorm2d(num_features=128, affine=True, track_running_stats=True),
+            nn.GLU(dim=1)
+        )
 
-        self.down_sample_3 = DownSampleBlock(dim_in=64,
-                                             dim_out=128,
-                                             kernel_size=(4, 8),
-                                             stride=(2, 2),
-                                             padding=(1, 3),
-                                             bias=False)
+        self.down_sample_3 = nn.Sequential(
+            nn.Conv2d(in_channels=64, out_channels=256, kernel_size=(4, 8), stride=(2, 2), padding=(1, 3), bias=False),
+            nn.BatchNorm2d(num_features=256, affine=True, track_running_stats=True),
+            nn.GLU(dim=1)
+        )
 
-        self.down_sample_4 = DownSampleBlock(dim_in=128,
-                                             dim_out=64,
-                                             kernel_size=(3, 5),
-                                             stride=(1, 1),
-                                             padding=(1, 2),
-                                             bias=False)
+        self.down_sample_4 = nn.Sequential(
+            nn.Conv2d(in_channels=128, out_channels=128, kernel_size=(3, 5), stride=(1, 1), padding=(1, 2), bias=False),
+            nn.BatchNorm2d(num_features=128, affine=True, track_running_stats=True),
+            nn.GLU(dim=1)
+        )
 
-        self.down_sample_5 = DownSampleBlock(dim_in=64,
-                                             dim_out=5,
-                                             kernel_size=(9, 5),
-                                             stride=(9, 1),
-                                             padding=(1, 2),
-                                             bias=False)
+        self.down_sample_5 = nn.Sequential(
+            nn.Conv2d(in_channels=64, out_channels=10, kernel_size=(9, 5), stride=(9, 1), padding=(1, 2), bias=False),
+            nn.BatchNorm2d(num_features=10, affine=True, track_running_stats=True),
+            nn.GLU(dim=1)
+        )
 
         # Up-sampling layers.
-        self.up_sample_1 = UpSampleBlock(dim_in=9,
-                                         dim_out=64,
-                                         kernel_size=(9, 5),
-                                         stride=(9, 1),
-                                         padding=(0, 2),
-                                         bias=False)
+        self.up_sample_1 = nn.Sequential(
+            nn.ConvTranspose2d(in_channels=9, out_channels=128, kernel_size=(9, 5), stride=(9, 1), padding=(0, 2), bias=False),
+            nn.BatchNorm2d(num_features=128, affine=True, track_running_stats=True),
+            nn.GLU(dim=1)
+        )
 
-        self.up_sample_2 = UpSampleBlock(dim_in=68,
-                                         dim_out=128,
-                                         kernel_size=(3, 5),
-                                         stride=(1, 1),
-                                         padding=(1, 2),
-                                         bias=False)
+        self.up_sample_2 = nn.Sequential(
+            nn.ConvTranspose2d(in_channels=68, out_channels=256, kernel_size=(3, 5), stride=(1, 1), padding=(1, 2), bias=False),
+            nn.BatchNorm2d(num_features=256, affine=True, track_running_stats=True),
+            nn.GLU(dim=1)
+        )
 
-        self.up_sample_3 = UpSampleBlock(dim_in=132,
-                                         dim_out=64,
-                                         kernel_size=(4, 8),
-                                         stride=(2, 2),
-                                         padding=(1, 3),
-                                         bias=False)
+        self.up_sample_3 = nn.Sequential(
+            nn.ConvTranspose2d(in_channels=132, out_channels=128, kernel_size=(4, 8), stride=(2, 2), padding=(1, 3), bias=False),
+            nn.BatchNorm2d(num_features=128, affine=True, track_running_stats=True),
+            nn.GLU(dim=1)
+        )
 
-        self.up_sample_4 = UpSampleBlock(dim_in=68,
-                                         dim_out=32,
-                                         kernel_size=(4, 8),
-                                         stride=(2, 2),
-                                         padding=(1, 3),
-                                         bias=False)
+        self.up_sample_4 = nn.Sequential(
+            nn.ConvTranspose2d(in_channels=68, out_channels=64, kernel_size=(4, 8), stride=(2, 2), padding=(1, 3), bias=False),
+            nn.BatchNorm2d(num_features=64, affine=True, track_running_stats=True),
+            nn.GLU(dim=1)
+        )
 
         # Deconv
         self.deconv_layer = nn.ConvTranspose2d(in_channels=36,
@@ -308,7 +299,7 @@ if __name__ == '__main__':
 
     argv = parser.parse_args()
     train_dir = argv.train_dir
-    speakers_using = argv.speaker
+    speakers_using = argv.speakers
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
