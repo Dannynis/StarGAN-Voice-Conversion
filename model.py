@@ -149,30 +149,56 @@ class Generator(nn.Module):
 
 class Discriminator(nn.Module):
     """Discriminator network with PatchGAN."""
-    def __init__(self, input_size=(36, 512), conv_dim=64, repeat_num=5, num_speakers=10):
+    def __init__(self, input_size=(36, 512), repeat_num=5, num_speakers=10):
         super(Discriminator, self).__init__()
-        layers = []
-        layers.append(nn.Conv2d(1, conv_dim, kernel_size=4, stride=2, padding=1))
-        layers.append(nn.LeakyReLU(0.01))
 
-        curr_dim = conv_dim
-        for i in range(1, repeat_num):
-            layers.append(nn.Conv2d(curr_dim, curr_dim * 2, kernel_size=4, stride=2, padding=1))
-            layers.append(nn.LeakyReLU(0.01))
-            curr_dim = curr_dim * 2
+        self.down_sample_1 = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=64, kernel_size=4, stride=2, padding=1),
+            nn.InstanceNorm2d(num_features=64),
+            nn.GLU(dim=1)
+        )
+
+        self.down_sample_2 = nn.Sequential(
+            nn.Conv2d(in_channels=32, out_channels=128, kernel_size=4, stride=2, padding=1),
+            nn.InstanceNorm2d(num_features=128),
+            nn.GLU(dim=1)
+        )
+
+        self.down_sample_3 = nn.Sequential(
+            nn.Conv2d(in_channels=64, out_channels=256, kernel_size=4, stride=2, padding=1),
+            nn.InstanceNorm2d(num_features=256),
+            nn.GLU(dim=1)
+        )
+
+        self.down_sample_4 = nn.Sequential(
+            nn.Conv2d(in_channels=128, out_channels=512, kernel_size=4, stride=2, padding=1),
+            nn.InstanceNorm2d(num_features=512),
+            nn.GLU(dim=1)
+        )
+
+        self.down_sample_5 = nn.Sequential(
+            nn.Conv2d(in_channels=256, out_channels=1024, kernel_size=4, stride=2, padding=1),
+            nn.InstanceNorm2d(num_features=1024),
+            nn.GLU(dim=1)
+        )
 
         kernel_size_0 = int(input_size[0] / np.power(2, repeat_num))  # 1
         kernel_size_1 = int(input_size[1] / np.power(2, repeat_num))  # 8
-        self.main = nn.Sequential(*layers)
-        self.conv_dis = nn.Conv2d(curr_dim, 1, kernel_size=(kernel_size_0, kernel_size_1), stride=1, padding=0,
+
+        self.conv_dis = nn.Conv2d(512, 1, kernel_size=(kernel_size_0, kernel_size_1), stride=1, padding=0,
                                   bias=False)  # padding should be 0
-        self.conv_clf_spks = nn.Conv2d(curr_dim, num_speakers, kernel_size=(kernel_size_0, kernel_size_1), stride=1,
+        self.conv_clf_spks = nn.Conv2d(512, num_speakers, kernel_size=(kernel_size_0, kernel_size_1), stride=1,
                                        padding=0, bias=False)  # for num_speaker
 
     def forward(self, x):
-        h = self.main(x)
-        out_src = self.conv_dis(h)
-        out_cls_spks = self.conv_clf_spks(h)
+        x = self.down_sample_1(x)
+        x = self.down_sample_2(x)
+        x = self.down_sample_3(x)
+        x = self.down_sample_4(x)
+        x = self.down_sample_5(x)
+
+        out_src = self.conv_dis(x)
+        out_cls_spks = self.conv_clf_spks(x)
         return out_src, out_cls_spks.view(out_cls_spks.size(0), out_cls_spks.size(1))
 
 
