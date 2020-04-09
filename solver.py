@@ -208,19 +208,19 @@ class Solver(object):
             # =================================================================================== #
 
             # Compute loss with real mc feats.
-            d_out_src, d_out_cls_real = self.discriminator(mc_real)
+            d_out_src, d_out_cls_real = self.discriminator(mc_real, spk_c_org)
             d_loss_real = - torch.mean(d_out_src)
-            d_loss_cls_spks = self.classification_loss(d_out_cls_real, spk_label_org)
+            d_loss_cls_spks = 0 # self.classification_loss(d_out_cls_real, spk_label_org)
 
             # Compute loss with face mc feats.
             mc_fake = self.generator(mc_real, spk_c_trg)
-            d_out_fake, _ = self.discriminator(mc_fake.detach())
+            d_out_fake, _ = self.discriminator(mc_fake.detach(), spk_c_trg)
             d_loss_fake = torch.mean(d_out_fake)
 
             # Compute loss for gradient penalty.
             alpha = torch.rand(mc_real.size(0), 1, 1, 1).to(self.device)
             x_hat = (alpha * mc_real.data + (1 - alpha) * mc_fake.data).requires_grad_(True)
-            d_out_src, _ = self.discriminator(x_hat)
+            d_out_src, _ = self.discriminator(x_hat, spk_c_trg)
             d_loss_gp = self.gradient_penalty(d_out_src, x_hat)
 
             # Backward and optimize.
@@ -243,9 +243,9 @@ class Solver(object):
             if (i+1) % self.n_critic == 0:
                 # Original-to-target domain.
                 mc_fake = self.generator(mc_real, spk_c_trg)
-                g_out_src, g_out_cls_spks = self.discriminator(mc_fake)
+                g_out_src, g_out_cls_spks = self.discriminator(mc_fake, spk_c_trg)
                 g_loss_fake = - torch.mean(g_out_src)
-                g_loss_cls_spks = self.classification_loss(g_out_cls_spks, spk_label_trg)
+                g_loss_cls_spks = 0 # self.classification_loss(g_out_cls_spks, spk_label_trg)
 
                 # Target-to-original domain. Cycle-consistent.
                 mc_reconst = self.generator(mc_fake, spk_c_org)
@@ -260,8 +260,9 @@ class Solver(object):
                 # if (i+1) < 10**4:  # only calc. id mapping loss on first 10^4 iters.
                 g_loss = g_loss_fake \
                     + self.lambda_rec * g_loss_rec \
-                    + self.lambda_cls * g_loss_cls_spks \
                     + self.lambda_id * g_loss_id
+                    # + self.lambda_cls * g_loss_cls_spks \
+
                 # else:
                 #     g_loss = g_loss_fake \
                 #              + self.lambda_rec * g_loss_rec \
