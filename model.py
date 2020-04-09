@@ -48,7 +48,7 @@ class ResidualBlock(nn.Module):
         x_ = self.cin_1(x_, c)
         x_ = self.relu_1(x_)
 
-        return x + x_
+        return x_
 
 
 class Generator(nn.Module):
