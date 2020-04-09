@@ -18,7 +18,7 @@ class DownSampleBlock(nn.Module):
                                     bias=bias)
 
         self.batch_norm = nn.BatchNorm2d(dim_out, affine=True, track_running_stats=True)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.GLU(dim=1)
 
     def forward(self, x):
         x = self.conv_layer(x)
@@ -168,22 +168,22 @@ class Discriminator(nn.Module):
                                              padding=(1, 4),
                                              bias=False)
 
-        self.down_sample_2 = DownSampleBlock(dim_in=36,
-                                             dim_out=32,
+        self.down_sample_2 = DownSampleBlock(dim_in=20,
+                                             dim_out=64,
                                              kernel_size=(3, 8),
                                              stride=(1, 1),
                                              padding=(1, 3),
                                              bias=False)
 
         self.down_sample_3 = DownSampleBlock(dim_in=36,
-                                             dim_out=32,
+                                             dim_out=64,
                                              kernel_size=(3, 8),
                                              stride=(1, 1),
                                              padding=(1, 3),
                                              bias=False)
 
         self.down_sample_4 = DownSampleBlock(dim_in=36,
-                                             dim_out=32,
+                                             dim_out=64,
                                              kernel_size=(3, 6),
                                              stride=(1, 1),
                                              padding=(1, 2),
@@ -242,22 +242,22 @@ class DomainClassifier(nn.Module):
                                              padding=(5, 1),
                                              bias=False)
 
-        self.down_sample_2 = DownSampleBlock(dim_in=8,
+        self.down_sample_2 = DownSampleBlock(dim_in=4,
                                              dim_out=16,
                                              kernel_size=(4, 4),
                                              stride=(2, 2),
                                              padding=(1, 1),
                                              bias=False)
 
-        self.down_sample_3 = DownSampleBlock(dim_in=16,
+        self.down_sample_3 = DownSampleBlock(dim_in=8,
                                              dim_out=32,
                                              kernel_size=(4, 4),
                                              stride=(2, 2),
                                              padding=(0, 1),
                                              bias=False)
 
-        self.down_sample_4 = DownSampleBlock(dim_in=32,
-                                             dim_out=16,
+        self.down_sample_4 = DownSampleBlock(dim_in=16,
+                                             dim_out=32,
                                              kernel_size=(3, 4),
                                              stride=(1, 2),
                                              padding=(1, 1),
