@@ -208,19 +208,18 @@ class Solver(object):
             # =================================================================================== #
 
             # Compute loss with real mc feats.
-            d_out_src, d_out_cls_real = self.discriminator(mc_real, spk_c_org)
+            d_out_src = self.discriminator(mc_real, spk_c_org)
             d_loss_real = - torch.mean(d_out_src)
-            d_loss_cls_spks = self.classification_loss(d_out_cls_real, spk_label_org)
 
             # Compute loss with face mc feats.
             mc_fake = self.generator(mc_real, spk_c_trg)
-            d_out_fake, _ = self.discriminator(mc_fake.detach(), spk_c_trg)
+            d_out_fake = self.discriminator(mc_fake.detach(), spk_c_trg)
             d_loss_fake = torch.mean(d_out_fake)
 
             # Compute loss for gradient penalty.
             alpha = torch.rand(mc_real.size(0), 1, 1, 1).to(self.device)
             x_hat = (alpha * mc_real.data + (1 - alpha) * mc_fake.data).requires_grad_(True)
-            d_out_src, _ = self.discriminator(x_hat, spk_c_trg)
+            d_out_src = self.discriminator(x_hat, spk_c_trg)
             d_loss_gp = self.gradient_penalty(d_out_src, x_hat)
 
             # Backward and optimize.
@@ -234,7 +233,7 @@ class Solver(object):
             loss = {}
             loss['D/loss_gp'] = d_loss_gp.item()
             loss['D/loss'] = d_loss.item()
-            loss['D/loss_cls'] = d_loss_cls_spks.item()
+            loss['D/loss_cls'] = d_loss.item()
 
             # =================================================================================== #
             #                               3. Train the generator                                #
@@ -243,9 +242,8 @@ class Solver(object):
             if (i+1) % self.n_critic == 0:
                 # Original-to-target domain.
                 mc_fake = self.generator(mc_real, spk_c_trg)
-                g_out_src, g_out_cls_spks = self.discriminator(mc_fake, spk_c_trg)
+                g_out_src = self.discriminator(mc_fake, spk_c_trg)
                 g_loss_fake = - torch.mean(g_out_src)
-                g_loss_cls_spks = self.classification_loss(g_out_cls_spks, spk_label_trg)
 
                 # Target-to-original domain. Cycle-consistent.
                 mc_reconst = self.generator(mc_fake, spk_c_org)
@@ -261,7 +259,6 @@ class Solver(object):
                 g_loss = g_loss_fake \
                     + self.lambda_rec * g_loss_rec \
                     + self.lambda_id * g_loss_id
-                    # + self.lambda_cls * g_loss_cls_spks \
 
                 # else:
                 #     g_loss = g_loss_fake \
@@ -275,7 +272,7 @@ class Solver(object):
                 # Logging.
                 loss['G/loss_fake'] = g_loss_fake.item()
                 loss['G/loss_rec'] = g_loss_rec.item()
-                loss['G/loss_cls'] = g_loss_cls_spks.item()
+                loss['G/loss_cls'] = g_loss.item()
                 loss['G/loss'] = g_loss.item()
 
             # =================================================================================== #

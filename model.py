@@ -271,7 +271,7 @@ class Discriminator(nn.Module):
         x = torch.squeeze(x)
         x = torch.sigmoid(x)
 
-        return x, c
+        return x
 
 
 # Just for testing shapes of architecture.
@@ -318,8 +318,8 @@ if __name__ == '__main__':
     print('Testing Discriminator')
     print('-------------------------')
     print(f'Shape in: {mc_real.shape}')
-    dis_real, out_cls = discriminator(mc_real, spk_c_trg)
-    print(f'Shape out: {dis_real.shape}, {out_cls.shape}')
+    dis_real = discriminator(mc_real, spk_c_trg)
+    print(f'Shape out: {dis_real.shape}')
     print('------------------------')
 
     print('Testing Generator')
