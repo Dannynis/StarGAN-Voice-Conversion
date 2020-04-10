@@ -210,7 +210,7 @@ class Solver(object):
             # Compute loss with real mc feats.
             d_out_src, d_out_cls_real = self.discriminator(mc_real, spk_c_org)
             d_loss_real = - torch.mean(d_out_src)
-            d_loss_cls_spks = 0 # self.classification_loss(d_out_cls_real, spk_label_org)
+            d_loss_cls_spks = self.classification_loss(d_out_cls_real, spk_label_org)
 
             # Compute loss with face mc feats.
             mc_fake = self.generator(mc_real, spk_c_trg)
@@ -245,7 +245,7 @@ class Solver(object):
                 mc_fake = self.generator(mc_real, spk_c_trg)
                 g_out_src, g_out_cls_spks = self.discriminator(mc_fake, spk_c_trg)
                 g_loss_fake = - torch.mean(g_out_src)
-                g_loss_cls_spks = 0 # self.classification_loss(g_out_cls_spks, spk_label_trg)
+                g_loss_cls_spks = self.classification_loss(g_out_cls_spks, spk_label_trg)
 
                 # Target-to-original domain. Cycle-consistent.
                 mc_reconst = self.generator(mc_fake, spk_c_org)
