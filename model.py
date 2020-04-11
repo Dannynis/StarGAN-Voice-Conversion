@@ -147,129 +147,65 @@ class Generator(nn.Module):
         return x
 
 
-# class Discriminator(nn.Module):
-#     """Discriminator network with PatchGAN."""
-#     def __init__(self, input_size=(36, 512), repeat_num=5, num_speakers=10):
-#         super(Discriminator, self).__init__()
-#
-#         self.down_sample_1 = nn.Sequential(
-#             nn.Conv2d(in_channels=1, out_channels=64, kernel_size=4, stride=2, padding=1),
-#             nn.InstanceNorm2d(num_features=64),
-#             nn.GLU(dim=1)
-#         )
-#
-#         self.down_sample_2 = nn.Sequential(
-#             nn.Conv2d(in_channels=32, out_channels=128, kernel_size=4, stride=2, padding=1),
-#             nn.InstanceNorm2d(num_features=128),
-#             nn.GLU(dim=1)
-#         )
-#
-#         self.down_sample_3 = nn.Sequential(
-#             nn.Conv2d(in_channels=64, out_channels=256, kernel_size=4, stride=2, padding=1),
-#             nn.InstanceNorm2d(num_features=256),
-#             nn.GLU(dim=1)
-#         )
-#
-#         self.down_sample_4 = nn.Sequential(
-#             nn.Conv2d(in_channels=128, out_channels=512, kernel_size=4, stride=2, padding=1),
-#             nn.InstanceNorm2d(num_features=512),
-#             nn.GLU(dim=1)
-#         )
-#
-#         self.down_sample_5 = nn.Sequential(
-#             nn.Conv2d(in_channels=256, out_channels=1024, kernel_size=4, stride=2, padding=1),
-#             nn.InstanceNorm2d(num_features=1024),
-#             nn.GLU(dim=1)
-#         )
-#
-#         kernel_size_0 = int(input_size[0] / np.power(2, repeat_num))  # 1
-#         kernel_size_1 = int(input_size[1] / np.power(2, repeat_num))  # 8
-#
-#         self.conv_dis = nn.Conv2d(512, 1, kernel_size=(kernel_size_0, kernel_size_1), stride=1, padding=0,
-#                                   bias=False)  # padding should be 0
-#         self.conv_clf_spks = nn.Conv2d(512, num_speakers, kernel_size=(kernel_size_0, kernel_size_1), stride=1,
-#                                        padding=0, bias=False)  # for num_speaker
-#
-#     def forward(self, x):
-#         x = self.down_sample_1(x)
-#         x = self.down_sample_2(x)
-#         x = self.down_sample_3(x)
-#         x = self.down_sample_4(x)
-#         x = self.down_sample_5(x)
-#
-#         out_src = self.conv_dis(x)
-#         out_cls_spks = self.conv_clf_spks(x)
-#         return out_src, out_cls_spks.view(out_cls_spks.size(0), out_cls_spks.size(1))
-
-
 class Discriminator(nn.Module):
-    """Discriminator network with PatchGAN."""
-    def __init__(self, num_speakers=4):
+    """Discriminator network."""
+    def __init__(self, num_speakers=10):
         super(Discriminator, self).__init__()
-        i = num_speakers + 1
 
-        # Downsample
+        self.num_speakers = num_speakers
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+        # Initial layers.
+        self.conv_layer_1 = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=128, kernel_size=(3, 3), stride=(1, 1), padding=1),
+            nn.GLU(dim=1)
+        )
+
+        # Down-sampling layers.
         self.down_sample_1 = nn.Sequential(
-            nn.Conv2d(in_channels=i, out_channels=64, kernel_size=(3, 9), stride=(1, 1), padding=(1, 4), bias=False),
-            nn.InstanceNorm2d(num_features=64),
+            nn.Conv2d(in_channels=64, out_channels=256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False),
+            nn.InstanceNorm2d(num_features=256, affine=True, track_running_stats=True),
             nn.GLU(dim=1)
         )
-
         self.down_sample_2 = nn.Sequential(
-            nn.Conv2d(in_channels=36, out_channels=64, kernel_size=(3, 8), stride=(1, 1), padding=(1, 3), bias=False),
-            nn.InstanceNorm2d(num_features=64),
+            nn.Conv2d(in_channels=128, out_channels=512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False),
+            nn.InstanceNorm2d(num_features=512, affine=True, track_running_stats=True),
             nn.GLU(dim=1)
         )
-
         self.down_sample_3 = nn.Sequential(
-            nn.Conv2d(in_channels=36, out_channels=64, kernel_size=(3, 8), stride=(1, 1), padding=(1, 3), bias=False),
-            nn.InstanceNorm2d(num_features=64),
+            nn.Conv2d(in_channels=256, out_channels=1024, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False),
+            nn.InstanceNorm2d(num_features=1024, affine=True, track_running_stats=True),
             nn.GLU(dim=1)
         )
-
         self.down_sample_4 = nn.Sequential(
-            nn.Conv2d(in_channels=36, out_channels=64, kernel_size=(3, 6), stride=(1, 1), padding=(1, 2), bias=False),
-            nn.InstanceNorm2d(num_features=64),
+            nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=(1, 5), stride=(1, 1), padding=(0, 2), bias=False),
+            nn.InstanceNorm2d(num_features=1024, affine=True, track_running_stats=True),
             nn.GLU(dim=1)
         )
 
-        self.conv_layer = nn.Conv2d(in_channels=36,
-                                    out_channels=1,
-                                    kernel_size=(36, 5),
-                                    stride=(36, 1),
-                                    padding=(0, 2),
-                                    bias=False)
+        # Fully connected layer.
+        self.fully_connected = nn.Linear(in_features=512, out_features=1)
 
-        self.pool = nn.AvgPool2d(kernel_size=(1, 64))
+        # Projection.
+        self.projection = nn.Linear(self.num_speakers * 2, 512)
 
-    def forward(self, x, c):
-        # Replicate spatially..
-        c = c.view(c.size(0), c.size(1), 1, 1)
+    def forward(self, x, c, c_):
+        c_onehot = torch.cat((c, c_), dim=1).to(self.device)
 
-        # concat domain specific information
-        c1 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c1], dim=1)
+        x = self.conv_layer_1(x)
+
         x = self.down_sample_1(x)
-
-        c2 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c2], dim=1)
         x = self.down_sample_2(x)
-
-        c3 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c3], dim=1)
         x = self.down_sample_3(x)
+        x_ = self.down_sample_4(x)
 
-        c4 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c4], dim=1)
-        x = self.down_sample_4(x)
+        h = torch.sum(x_, dim=(2, 3))
 
-        c5 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c5], dim=1)
-        x = self.conv_layer(x)
+        x = self.fully_connected(h)
 
-        x = self.pool(x)
-        x = torch.squeeze(x)
-        x = torch.sigmoid(x)
+        p = self.projection(c_onehot)
+
+        x += torch.sum(p * h, dim=1, keepdim=True)
 
         return x
 
@@ -318,7 +254,7 @@ if __name__ == '__main__':
     print('Testing Discriminator')
     print('-------------------------')
     print(f'Shape in: {mc_real.shape}')
-    dis_real = discriminator(mc_real, spk_c_trg)
+    dis_real = discriminator(mc_real, spk_c_org, spk_c_trg)
     print(f'Shape out: {dis_real.shape}')
     print('------------------------')
 
