@@ -187,10 +187,11 @@ class Discriminator(nn.Module):
         self.fully_connected = nn.Linear(in_features=512, out_features=1)
 
         # Projection.
-        self.projection = nn.Linear(self.num_speakers * 2, 512)
+        self.projection = nn.Linear(self.num_speakers, 512)
 
     def forward(self, x, c, c_):
-        c_onehot = torch.cat((c, c_), dim=1).to(self.device)
+        # c_onehot = torch.cat((c, c_), dim=1).to(self.device)
+        c_onehot = c_
 
         x = self.conv_layer_1(x)
 
