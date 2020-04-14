@@ -207,55 +207,55 @@ class Solver(object):
         self.freeze_residual_block(self.freeze_no)
         print("R1 Gradients")
         print("------------")
-        for param in self.generator.residual_1:
+        for param in self.generator.residual_1.parameters():
             print(param.requires_grad)
 
         print("------------")
         print("R2 Gradients")
         print("------------")
-        for param in self.generator.residual_2:
+        for param in self.generator.residual_2.parameters():
             print(param.requires_grad)
 
         print("------------")
         print("R3 Gradients")
         print("------------")
-        for param in self.generator.residual_3:
+        for param in self.generator.residual_3.parameters():
             print(param.requires_grad)
 
         print("------------")
         print("R4 Gradients")
         print("------------")
-        for param in self.generator.residual_4:
+        for param in self.generator.residual_4.parameters():
             print(param.requires_grad)
 
         print("------------")
         print("R5 Gradients")
         print("------------")
-        for param in self.generator.residual_5:
+        for param in self.generator.residual_5.parameters():
             print(param.requires_grad)
 
         print("------------")
         print("R6 Gradients")
         print("------------")
-        for param in self.generator.residual_6:
+        for param in self.generator.residual_6.parameters():
             print(param.requires_grad)
 
         print("------------")
         print("R7 Gradients")
         print("------------")
-        for param in self.generator.residual_7:
+        for param in self.generator.residual_7.parameters():
             print(param.requires_grad)
 
         print("------------")
         print("R8 Gradients")
         print("------------")
-        for param in self.generator.residual_8:
+        for param in self.generator.residual_8.parameters():
             print(param.requires_grad)
 
         print("------------")
         print("R9 Gradients")
         print("------------")
-        for param in self.generator.residual_9:
+        for param in self.generator.residual_9.parameters():
             print(param.requires_grad)
 
         # Start training.
