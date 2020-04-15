@@ -101,22 +101,22 @@ class Solver(object):
         if 2 in block_no:
             for param in self.generator.residual_2.parameters():
                 param.requires_grad = False
-        elif 3 in block_no:
+        if 3 in block_no:
             for param in self.generator.residual_3.parameters():
                 param.requires_grad = False
-        elif 4 in block_no:
+        if 4 in block_no:
             for param in self.generator.residual_4.parameters():
                 param.requires_grad = False
-        elif 5 in block_no:
+        if 5 in block_no:
             for param in self.generator.residual_5.parameters():
                 param.requires_grad = False
-        elif 6 in block_no:
+        if 6 in block_no:
             for param in self.generator.residual_6.parameters():
                 param.requires_grad = False
-        elif 7 in block_no:
+        if 7 in block_no:
             for param in self.generator.residual_7.parameters():
                 param.requires_grad = False
-        elif 8 in block_no:
+        if 8 in block_no:
             for param in self.generator.residual_8.parameters():
                 param.requires_grad = False
 
