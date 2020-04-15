@@ -96,27 +96,27 @@ class Solver(object):
         self.generator.load_state_dict(torch.load(g_path, map_location=lambda storage, loc: storage))
         self.discriminator.load_state_dict(torch.load(d_path, map_location=lambda storage, loc: storage))
 
-    def freeze_residual_block(self, block_no=0):
+    def freeze_residual_block(self, block_no):
         """Freeze residual block number block_no."""
-        if block_no == 2:
+        if 2 in block_no:
             for param in self.generator.residual_2.parameters():
                 param.requires_grad = False
-        elif block_no == 3:
+        elif 3 in block_no:
             for param in self.generator.residual_3.parameters():
                 param.requires_grad = False
-        elif block_no == 4:
+        elif 4 in block_no:
             for param in self.generator.residual_4.parameters():
                 param.requires_grad = False
-        elif block_no == 5:
+        elif 5 in block_no:
             for param in self.generator.residual_5.parameters():
                 param.requires_grad = False
-        elif block_no == 6:
+        elif 6 in block_no:
             for param in self.generator.residual_6.parameters():
                 param.requires_grad = False
-        elif block_no == 7:
+        elif 7 in block_no:
             for param in self.generator.residual_7.parameters():
                 param.requires_grad = False
-        elif block_no == 8:
+        elif 8 in block_no:
             for param in self.generator.residual_8.parameters():
                 param.requires_grad = False
 
