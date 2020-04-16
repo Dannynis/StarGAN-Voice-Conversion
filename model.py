@@ -57,16 +57,16 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
         # Down-sampling layers
         self.down_sample_1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=128, kernel_size=(3, 9), padding=(1, 4), bias=False),
+            nn.Conv2d(in_channels=1, out_channels=128, kernel_size=(5, 15), padding=(2, 7), bias=False),
             nn.GLU(dim=1)
         )
         self.down_sample_2 = nn.Sequential(
-            nn.Conv2d(in_channels=64, out_channels=256, kernel_size=(4, 8), stride=(2, 2), padding=(1, 3), bias=False),
+            nn.Conv2d(in_channels=64, out_channels=256, kernel_size=(5, 5), stride=(2, 2), padding=(2, 2), bias=False),
             nn.InstanceNorm2d(num_features=256, affine=True, track_running_stats=True),
             nn.GLU(dim=1)
         )
         self.down_sample_3 = nn.Sequential(
-            nn.Conv2d(in_channels=128, out_channels=512, kernel_size=(4, 8), stride=(2, 2), padding=(1, 3), bias=False),
+            nn.Conv2d(in_channels=128, out_channels=512, kernel_size=(5, 5), stride=(2, 2), padding=(2, 2), bias=False),
             nn.InstanceNorm2d(num_features=512, affine=True, track_running_stats=True),
             nn.GLU(dim=1)
         )
