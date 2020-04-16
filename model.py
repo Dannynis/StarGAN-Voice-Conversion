@@ -58,7 +58,6 @@ class Generator(nn.Module):
         # Down-sampling layers
         self.down_sample_1 = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=128, kernel_size=(3, 9), padding=(1, 4), bias=False),
-            nn.InstanceNorm2d(num_features=128, affine=True, track_running_stats=True),
             nn.GLU(dim=1)
         )
         self.down_sample_2 = nn.Sequential(
@@ -104,18 +103,18 @@ class Generator(nn.Module):
 
         # Up-sampling layers.
         self.up_sample_1 = nn.Sequential(
-            nn.ConvTranspose2d(in_channels=256, out_channels=256, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.InstanceNorm2d(num_features=256, affine=True, track_running_stats=True),
+            nn.ConvTranspose2d(in_channels=256, out_channels=1024, kernel_size=5, stride=1, padding=2, bias=False),
+            nn.PixelShuffle(upscale_factor=2),
             nn.GLU(dim=1)
         )
         self.up_sample_2 = nn.Sequential(
-            nn.ConvTranspose2d(in_channels=128, out_channels=128, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.InstanceNorm2d(num_features=128, affine=True, track_running_stats=True),
+            nn.ConvTranspose2d(in_channels=128, out_channels=512, kernel_size=5, stride=1, padding=2, bias=False),
+            nn.PixelShuffle(upscale_factor=2),
             nn.GLU(dim=1)
         )
 
         # Out.
-        self.out = nn.Conv2d(in_channels=64, out_channels=1, kernel_size=7, stride=1, padding=3, bias=False)
+        self.out = nn.Conv2d(in_channels=64, out_channels=1, kernel_size=(5, 15), stride=1, padding=(2, 7), bias=False)
 
     def forward(self, x, c):
         width_size = x.size(3)
