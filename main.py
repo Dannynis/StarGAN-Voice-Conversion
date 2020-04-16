@@ -50,6 +50,7 @@ if __name__ == '__main__':
     parser.add_argument('--lambda_gp', type=float, default=5, help='weight for gradient penalty')
     parser.add_argument('--lambda_id', type=float, default=5, help='weight for id mapping loss')
     parser.add_argument('--sampling_rate', type=int, default=16000, help='sampling rate')
+    parser.add_argument('--freeze_no', type=int, nargs='+', help='R blocks to freeze')
 
     # Training configuration.
     parser.add_argument('--batch_size', type=int, default=8, help='mini-batch size')
