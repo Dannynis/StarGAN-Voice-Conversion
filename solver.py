@@ -27,6 +27,7 @@ class Solver(object):
         self.lambda_rec = config.lambda_rec
         self.lambda_gp = config.lambda_gp
         self.lambda_id = config.lambda_id
+        self.freeze_no = config.freeze_no
 
         # Training configurations.
         self.batch_size = config.batch_size
@@ -94,6 +95,30 @@ class Solver(object):
 
         self.generator.load_state_dict(torch.load(g_path, map_location=lambda storage, loc: storage))
         self.discriminator.load_state_dict(torch.load(d_path, map_location=lambda storage, loc: storage))
+
+    def freeze_residual_block(self, block_no):
+        """Freeze residual block number block_no."""
+        if 2 in block_no:
+            for param in self.generator.residual_2.parameters():
+                param.requires_grad = False
+        if 3 in block_no:
+            for param in self.generator.residual_3.parameters():
+                param.requires_grad = False
+        if 4 in block_no:
+            for param in self.generator.residual_4.parameters():
+                param.requires_grad = False
+        if 5 in block_no:
+            for param in self.generator.residual_5.parameters():
+                param.requires_grad = False
+        if 6 in block_no:
+            for param in self.generator.residual_6.parameters():
+                param.requires_grad = False
+        if 7 in block_no:
+            for param in self.generator.residual_7.parameters():
+                param.requires_grad = False
+        if 8 in block_no:
+            for param in self.generator.residual_8.parameters():
+                param.requires_grad = False
 
     def build_tensorboard(self):
         """Build a tensorboard logger."""
@@ -175,6 +200,63 @@ class Solver(object):
             print("resuming step %d ..."% self.resume_iters)
             start_iters = self.resume_iters
             self.restore_model(self.resume_iters)
+
+        # =================================================================================== #
+        #                             0. Info about R freezing                                #
+        # =================================================================================== #
+        self.freeze_residual_block(self.freeze_no)
+        print("R1 Gradients")
+        print("------------")
+        for param in self.generator.residual_1.parameters():
+            print(param.requires_grad)
+
+        print("------------")
+        print("R2 Gradients")
+        print("------------")
+        for param in self.generator.residual_2.parameters():
+            print(param.requires_grad)
+
+        print("------------")
+        print("R3 Gradients")
+        print("------------")
+        for param in self.generator.residual_3.parameters():
+            print(param.requires_grad)
+
+        print("------------")
+        print("R4 Gradients")
+        print("------------")
+        for param in self.generator.residual_4.parameters():
+            print(param.requires_grad)
+
+        print("------------")
+        print("R5 Gradients")
+        print("------------")
+        for param in self.generator.residual_5.parameters():
+            print(param.requires_grad)
+
+        print("------------")
+        print("R6 Gradients")
+        print("------------")
+        for param in self.generator.residual_6.parameters():
+            print(param.requires_grad)
+
+        print("------------")
+        print("R7 Gradients")
+        print("------------")
+        for param in self.generator.residual_7.parameters():
+            print(param.requires_grad)
+
+        print("------------")
+        print("R8 Gradients")
+        print("------------")
+        for param in self.generator.residual_8.parameters():
+            print(param.requires_grad)
+
+        print("------------")
+        print("R9 Gradients")
+        print("------------")
+        for param in self.generator.residual_9.parameters():
+            print(param.requires_grad)
 
         # Start training.
         print('Start training...')
