@@ -200,6 +200,13 @@ class Solver(object):
             print("resuming step %d ..."% self.resume_iters)
             start_iters = self.resume_iters
             self.restore_model(self.resume_iters)
+        else:
+            print("no model to resume, so saving model init params...")
+            g_path = os.path.join(self.model_save_dir, 'tf_cin_19_0_epochs-G.ckpt')
+            d_path = os.path.join(self.model_save_dir, 'tf_cin_19_0_epochs-D.ckpt')
+            torch.save(self.generator.state_dict(), g_path)
+            torch.save(self.discriminator.state_dict(), d_path)
+            print('Saved model checkpoints into {}...'.format(self.model_save_dir))
 
         # =================================================================================== #
         #                             0. Info about R freezing                                #
