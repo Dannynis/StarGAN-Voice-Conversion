@@ -196,7 +196,7 @@ class Solver(object):
 
         # Start training from scratch or resume training.
         start_iters = 0
-        if self.resume_iters:
+        if self.resume_iters is not None:
             print("resuming step %d ..."% self.resume_iters)
             start_iters = self.resume_iters
             self.restore_model(self.resume_iters)
