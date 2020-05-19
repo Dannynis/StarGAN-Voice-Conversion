@@ -145,8 +145,8 @@ def process_spk(spk_path, mc_dir_train, mc_dir_test):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    origin_wavpath_default = "./data/VCTK-Corpus/wav48"
-    target_wavpath_default = "./data/VCTK-Corpus/wav16"
+    origin_wavpath_default = "./train_44k"
+    target_wavpath_default = "./train_44k"
     mc_dir_train_default = './data/mc/train'
     mc_dir_test_default = './data/mc/test'
 
@@ -169,7 +169,7 @@ if __name__ == '__main__':
     mc_dir_train = argv.mc_dir_train
     mc_dir_test = argv.mc_dir_test
     speaker_dirs = argv.speaker_dirs
-    num_workers = argv.num_workers if argv.num_workers is not None else cpu_count()
+    num_workers = 6#argv.num_workers if argv.num_workers is not None else cpu_count()
 
     # Do resample.
     if resample_rate > 0:

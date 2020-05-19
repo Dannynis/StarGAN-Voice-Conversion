@@ -4,7 +4,7 @@ import glob
 from os.path import join, basename
 import numpy as np
 
-min_length = 256   # Since we slice 256 frames from each utterance when training.
+min_length = 256  # Since we slice 256 frames from each utterance when training.
 
 
 def to_categorical(y, num_classes=None):
@@ -36,13 +36,17 @@ def to_categorical(y, num_classes=None):
 
 class MyDataset(data.Dataset):
     """Dataset for MCEP features and speaker labels."""
+
     def __init__(self, speakers_using, data_dir):
         self.speakers = speakers_using
         self.spk2idx = dict(zip(self.speakers, range(len(self.speakers))))
         self.prefix_length = len(self.speakers[0])
-
+        print(data_dir)
         mc_files = glob.glob(join(data_dir, '*.npy'))
-        mc_files = [i for i in mc_files if basename(i)[:self.prefix_length] in self.speakers]
+        print(len(mc_files))
+        print(mc_files[0].split('_'))
+        mc_files = [i for i in mc_files if i.split('/')[-1].split('_')[1].split('.')[0] in self.speakers]
+        print(len(mc_files))
         self.mc_files = self.rm_too_short_utt(mc_files)
         self.num_files = len(self.mc_files)
         print("\t Number of training samples: ", self.num_files)
@@ -50,7 +54,8 @@ class MyDataset(data.Dataset):
             mc = np.load(f)
             if mc.shape[0] <= min_length:
                 print(f)
-                raise RuntimeError(f"The data may be corrupted! We need all MCEP features having more than {min_length} frames!") 
+                raise RuntimeError(
+                    f"The data may be corrupted! We need all MCEP features having more than {min_length} frames!")
 
     def rm_too_short_utt(self, mc_files, min_length=min_length):
         new_mc_files = []
@@ -63,14 +68,14 @@ class MyDataset(data.Dataset):
     def sample_seg(self, feat, sample_len=min_length):
         assert feat.shape[0] - sample_len >= 0
         s = np.random.randint(0, feat.shape[0] - sample_len + 1)
-        return feat[s:s+sample_len, :]
+        return feat[s:s + sample_len, :]
 
     def __len__(self):
         return self.num_files
 
     def __getitem__(self, index):
         filename = self.mc_files[index]
-        spk = basename(filename).split('_')[0]
+        spk = basename(filename).split('_')[1].split('.')[0]
         spk_idx = self.spk2idx[spk]
         mc = np.load(filename)
         mc = self.sample_seg(mc)
@@ -79,10 +84,11 @@ class MyDataset(data.Dataset):
         spk_cat = np.squeeze(to_categorical([spk_idx], num_classes=len(self.speakers)))
 
         return torch.FloatTensor(mc), torch.LongTensor([spk_idx]).squeeze_(), torch.FloatTensor(spk_cat)
-        
+
 
 class TestDataset(object):
     """Dataset for testing."""
+
     def __init__(self, speakers_using, data_dir, wav_dir, src_spk='p262', trg_spk='p272'):
         self.speakers = speakers_using
         self.spk2idx = dict(zip(self.speakers, range(len(self.speakers))))
@@ -90,11 +96,12 @@ class TestDataset(object):
 
         self.src_spk = src_spk
         self.trg_spk = trg_spk
-        self.mc_files = sorted(glob.glob(join(data_dir, '{}*.npy'.format(self.src_spk))))
-
+        self.mc_files = sorted(glob.glob(join(data_dir, '*{}.npy'.format(self.src_spk))))
+        print('RRRRRRRR')
+        print(len(self.mc_files))
         self.src_spk_stats = np.load(join(data_dir.replace('test', 'train'), '{}_stats.npz'.format(src_spk)))
         self.trg_spk_stats = np.load(join(data_dir.replace('test', 'train'), '{}_stats.npz'.format(trg_spk)))
-        
+
         self.logf0s_mean_src = self.src_spk_stats['log_f0s_mean']
         self.logf0s_std_src = self.src_spk_stats['log_f0s_std']
         self.logf0s_mean_trg = self.trg_spk_stats['log_f0s_mean']
@@ -115,14 +122,14 @@ class TestDataset(object):
             filename = basename(mc_file).split('-')[-1]
             wavfile_path = join(self.src_wav_dir, filename.replace('npy', 'wav'))
             batch_data.append(wavfile_path)
-        return batch_data       
+        return batch_data
 
 
 def get_loader(speakers_using, data_dir, batch_size=32, mode='train', num_workers=1):
     dataset = MyDataset(speakers_using, data_dir)
     data_loader = data.DataLoader(dataset=dataset,
                                   batch_size=batch_size,
-                                  shuffle=(mode=='train'),
+                                  shuffle=(mode == 'train'),
                                   num_workers=num_workers,
                                   drop_last=True)
     return data_loader
